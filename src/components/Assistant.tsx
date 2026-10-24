@@ -12,9 +12,10 @@ const JD_HINT = "Paste the job description here…";
 
 /** Tiny, safe markdown: **bold**, "- " bullets, bare URLs and /paths as links. No HTML injection. */
 function renderInline(text: string): ReactNode[] {
-  const parts = text.split(/(\*\*[^*]+\*\*|https?:\/\/[^\s)]+|(?<=\s|^)\/[\w.-]+\.pdf)/g);
+  const parts = text.split(/(\*\*[^*]+\*\*|(?<=\s|^)_[^_\n]+_(?=\s|$|[.,])|https?:\/\/[^\s)]+|(?<=\s|^)\/[\w.-]+\.pdf)/g);
   return parts.map((p, i) => {
     if (/^\*\*[^*]+\*\*$/.test(p)) return <strong key={i} className="font-semibold text-fg">{p.slice(2, -2)}</strong>;
+    if (/^_[^_]+_$/.test(p)) return <em key={i} className="text-faint">{p.slice(1, -1)}</em>;
     if (/^(https?:\/\/|\/)/.test(p))
       return (
         <a key={i} href={p} target="_blank" rel="noreferrer" className="break-all text-accent underline-offset-2 hover:underline">
@@ -94,7 +95,7 @@ export function Assistant() {
           const err = await res.json().catch(() => ({}));
           throw new Error(err.error || "The assistant is unavailable right now.");
         }
-        setMode(res.headers.get("X-Assistant-Mode")?.startsWith("live") ? "live" : "local");
+        setMode(res.headers.get("X-Assistant-Mode")?.startsWith("local") ? "local" : "live");
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
         for (;;) {
@@ -193,7 +194,7 @@ export function Assistant() {
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold">Genfolio AI · Ask about Sameer</p>
                   <p className="text-xs text-muted">
-                    Grounded in his portfolio. {mode === "live" ? "Live model." : mode === "local" ? "Offline answers." : "No invented facts."}
+                    Grounded in his portfolio. {mode === "local" ? "Quick answers from the portfolio." : "Live AI, no invented facts."}
                   </p>
                 </div>
                 {turns.length > 0 && (
@@ -283,6 +284,9 @@ export function Assistant() {
                     </button>
                   )}
                 </div>
+                <p className="mt-2 px-1 text-center text-[11px] leading-snug text-faint">
+                  AI-generated from Sameer&apos;s portfolio and can be imperfect. Please confirm anything important with him directly.
+                </p>
               </form>
             </motion.div>
           </>

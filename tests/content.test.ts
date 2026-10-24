@@ -72,3 +72,20 @@ test("SSE parsing for Gemini and OpenAI-compatible (Groq) frames", async () => {
   assert.equal(geminiText('{"candidates":[{"content":{"parts":[{"text":"Hi "},{"text":"there"}]}}]}'), "Hi there");
   assert.equal(openAiText("not json"), "");
 });
+
+import { BUSY_NOTE, CANARY, leaks, SYSTEM_INSTRUCTION } from "../src/lib/assistant.ts";
+import { answerCache } from "../src/lib/cache.ts";
+
+test("guardrails: prompt carries the canary and rules; leak detector catches echoes", () => {
+  assert.ok(SYSTEM_INSTRUCTION.includes(CANARY));
+  assert.ok(leaks(SYSTEM_INSTRUCTION.slice(0, 300)), "echoing the opening of the prompt must be caught");
+  assert.ok(!leaks("Sameer built 5 Spring Boot microservices on EKS."));
+  assert.ok(BUSY_NOTE.endsWith("\n\n"));
+});
+
+test("answer cache normalizes questions and expires", () => {
+  const t = 1_000_000;
+  answerCache.set("Why should we hire Sameer?", { text: "because", provider: "gemini" }, t);
+  assert.equal(answerCache.get("why should we HIRE sameer", t + 1000)?.text, "because");
+  assert.equal(answerCache.get("why should we hire sameer", t + 7 * 3600_000), undefined);
+});

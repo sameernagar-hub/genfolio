@@ -1,4 +1,5 @@
-import { localAnswer, SYSTEM_INSTRUCTION, type ChatTurn } from "@/lib/assistant";
+import { BUSY_NOTE, leaks, localAnswer, REFUSE_INSTRUCTIONS, SYSTEM_INSTRUCTION, type ChatTurn } from "@/lib/assistant";
+import { answerCache } from "@/lib/cache";
 import { providers } from "@/lib/llm";
 import { checkRate, clientKey } from "@/lib/rate-limit";
 
@@ -8,6 +9,8 @@ export const dynamic = "force-dynamic";
 const MAX_MESSAGE = 4000;
 const MAX_HISTORY = 8;
 const TIMEOUT_MS = 20_000;
+/** Hold back the opening of each answer until it has been checked for a prompt leak. */
+const GUARD_CHARS = 240;
 
 const plain = (body: BodyInit, mode: string) =>
   new Response(body, { headers: { "Content-Type": "text/plain; charset=utf-8", "X-Assistant-Mode": mode, "Cache-Control": "no-store" } });
@@ -32,35 +35,77 @@ export async function POST(req: Request) {
         .map((t) => ({ role: t.role === "assistant" ? "assistant" : "user", content: t.content.slice(0, 1500) }))
     : [];
 
-  // Try each configured provider until one produces a first token.
-  for (const provider of providers()) {
+  // Fresh questions (no history) are cached: the starter prompts repeat a lot and model quota is small.
+  const cacheable = history.length === 0;
+  if (cacheable) {
+    const hit = answerCache.get(message);
+    if (hit) return plain(hit.text, `cache:${hit.provider}`);
+  }
+
+  const live = providers();
+
+  // Try each configured provider until one produces output.
+  for (const provider of live) {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
     const tokens = provider.stream({ system: SYSTEM_INSTRUCTION, history, message, signal: controller.signal });
-    let first: IteratorResult<string>;
+
+    // Read the opening before committing to this provider, so a failure can still fall through
+    // and a leaked prompt never reaches the browser.
+    let head = "";
+    let finished = false;
     try {
-      first = await tokens.next();
-      if (first.done) throw new Error("empty response");
+      while (head.length < GUARD_CHARS) {
+        const next = await tokens.next();
+        if (next.done) {
+          finished = true;
+          break;
+        }
+        head += next.value;
+      }
+      if (!head.trim()) throw new Error("empty response");
     } catch (err) {
       clearTimeout(timeout);
       console.error(`chat: ${provider.name} (${provider.model}) failed, trying next`, err);
       continue;
     }
 
+    if (leaks(head)) {
+      clearTimeout(timeout);
+      controller.abort();
+      console.warn(`chat: ${provider.name} began to leak its instructions; refused`);
+      return plain(REFUSE_INSTRUCTIONS, `guard:${provider.name}`);
+    }
+
     const encoder = new TextEncoder();
+    let full = head;
     const stream = new ReadableStream<Uint8Array>({
       start(ctrl) {
-        ctrl.enqueue(encoder.encode(first.value));
+        ctrl.enqueue(encoder.encode(head));
+        if (finished) {
+          clearTimeout(timeout);
+          if (cacheable) answerCache.set(message, { text: full, provider: provider.name });
+          ctrl.close();
+        }
       },
       async pull(ctrl) {
         try {
           const next = await tokens.next();
           if (next.done) {
             clearTimeout(timeout);
+            if (cacheable) answerCache.set(message, { text: full, provider: provider.name });
             ctrl.close();
-          } else {
-            ctrl.enqueue(encoder.encode(next.value));
+            return;
           }
+          full += next.value;
+          if (leaks(full)) {
+            clearTimeout(timeout);
+            controller.abort();
+            ctrl.enqueue(encoder.encode(`\n\n${REFUSE_INSTRUCTIONS}`));
+            ctrl.close();
+            return;
+          }
+          ctrl.enqueue(encoder.encode(next.value));
         } catch (err) {
           clearTimeout(timeout);
           console.error(`chat: ${provider.name} stream interrupted`, err);
@@ -75,5 +120,6 @@ export async function POST(req: Request) {
     return plain(stream, `live:${provider.name}`);
   }
 
-  return plain(localAnswer(message), "local");
+  // No provider configured, or all of them failed (rate limit, outage): answer from the graph.
+  return plain((live.length ? BUSY_NOTE : "") + localAnswer(message), live.length ? "local:busy" : "local");
 }

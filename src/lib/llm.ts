@@ -12,7 +12,7 @@ export type Provider = {
   stream: (args: { system: string; history: ChatTurn[]; message: string; signal: AbortSignal }) => AsyncGenerator<string>;
 };
 
-const MAX_TOKENS = 700;
+const MAX_TOKENS = 500;
 const TEMPERATURE = 0.4;
 
 /** Yields the `data:` payload of each server-sent event in a response body. */

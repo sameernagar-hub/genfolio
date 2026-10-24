@@ -137,7 +137,7 @@ export function graphAsContext(): string {
   lines.push("", "## Projects");
   for (const p of projects) {
     const award = p.award ? awardOf(p.award) : undefined;
-    lines.push(`### ${p.name} (${p.year}) — ${p.tagline}`, `Problem: ${p.problem}`);
+    lines.push(`### ${p.name} (${p.year}) — ${p.tagline}`);
     p.built.forEach((b) => lines.push(`- ${b}`));
     lines.push(`Proof: ${p.proof}`);
     if (award) lines.push(`Award: ${award.title}, ${award.eventNode.name}`);
@@ -153,8 +153,7 @@ export function graphAsContext(): string {
   lines.push("", "## Certifications", `- Salesforce: ${certifications.map((c) => c.name).join(", ")}`);
   lines.push("", "## Awards");
   awards.forEach((a) => lines.push(`- ${a.title}, ${eventById.get(a.event)!.name}${a.year ? ` (${a.year})` : ""}`));
-  lines.push("", "## Skills (with how many pieces of evidence back each)");
-  for (const s of rankedSkills) lines.push(`- ${s.label} [${s.groupLabel}]: ${s.weight}`);
+  lines.push("", "## Skills (most evidenced first)", rankedSkills.map((s) => s.label).join(", "));
   return lines.join("\n");
 }
 

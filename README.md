@@ -89,7 +89,13 @@ flowchart LR
 
 - **One graph, many files.** Roles, projects, skills, principles, and research point at each other by `id`. A highlight tagged `kafka` automatically becomes Kafka evidence on the page *and* in the AI's context. Nothing is typed twice.
 - **The AI can't drift from the page.** Its system prompt is generated from the same graph the UI renders, with instructions to refuse anything not in it.
-- **Safe by default.** The API key stays server-side in a header, never in a URL. `/api/chat` is rate-limited per IP (8/min, 60/day), caps input, and times out at 20 s. No phone number on the page or in the AI's context.
+- **Guardrails, in layers.**
+  - *Prompt rules:* answer only from the graph, never estimate salary or compare candidates, decline off-topic requests, never reveal instructions.
+  - *Server-side leak guard:* the prompt carries a canary; the opening of every answer is held back and checked, and a leak is cut off before it reaches the browser.
+  - *Failover:* Gemini ⇄ Groq, then offline answers from the graph (labelled as such), so the chat never shows an error page.
+  - *Limits:* per-IP rate limit (8/min, 60/day), input caps, 20 s timeout, 6-hour answer cache for repeat questions to stay inside free-tier quotas.
+  - *Honesty:* every chat carries a notice that answers are AI-generated and worth confirming with Sameer.
+- **Keys stay server-side** in headers, never in URLs. No phone number on the page or in the AI's context.
 - **Cheap to run.** One Render web service, `output: "standalone"`, static page with hourly revalidation.
 
 ```
