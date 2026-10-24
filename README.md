@@ -1,81 +1,110 @@
-# portfolio.ai
+<div align="center">
 
-AI-first portfolio app for Sameer Nagar. The main experience is a responsive portfolio surface with a ChatGPT-style homepage, sidebar navigation, live dev-tool panels, animated assistant intro states, and a grounded AI assistant.
+# Genfolio
 
-## Run Locally
+**An AI-native portfolio where every claim links to its evidence.**
+
+Sameer Nagar's portfolio, built on a small content graph: roles, projects, skills, research, and awards point at each other by id,
+so the page can show *where* each skill was used, and the AI assistant answers only from that graph.
+
+[Live site](https://genfolio.onrender.com) · [Resume](public/Sameer_Nagar_Resume.pdf) · [LinkedIn](https://www.linkedin.com/in/aavonsameer/) · [Email](mailto:nagarsam8989@gmail.com)
+
+![Next.js](https://img.shields.io/badge/Next.js-16-black) ![React](https://img.shields.io/badge/React-19-149eca) ![Tailwind](https://img.shields.io/badge/Tailwind-v4-38bdf8) ![Render](https://img.shields.io/badge/deploy-Render-46e3b7) ![License](https://img.shields.io/badge/license-MIT-blue)
+
+</div>
+
+## For recruiters (30 seconds)
+
+| | |
+|---|---|
+| **Role** | Software Engineer: backend / full-stack, AI/LLM, Salesforce |
+| **Now** | GenAI Lead & Full Stack Engineer, Saayam For All (5 Spring Boot microservices on AWS EKS + Kafka; owns the GenAI Lambda services and their CI/CD) |
+| **Before** | Software Engineer, Unthinkable Solutions (15+ production REST APIs, 99.9% uptime under SLA for 50+ enterprise clients) |
+| **Education** | M.S. Computer Science, CSUF (GPA 3.70). Thesis cut false positives 0.886 → 0.023 |
+| **Proof** | 2× first-place hackathons, 5× Salesforce certified, 2 peer-reviewed papers |
+| **Location** | San Jose, CA, open to relocation and onsite work |
+| **Work authorization** | F-1 OPT (STEM extension eligible); will need sponsorship in the future |
+
+**Fastest path:** open the site → *Interview my AI* or *Match your JD* → email.
+
+## What's on the site
+
+- **Sticky identity column** with availability, location, work authorization, resume, and a live section index.
+- **Interview my AI**: a streaming assistant grounded in the content graph (Gemini when a key is set, a deterministic offline answerer otherwise). Paste a job description and it lists matching skills with the role or project behind each one.
+- **Skills with receipts**: pick a skill and see the exact role, project, paper, or certification that proves it, ranked by how many independent sources back it.
+- **Selected work**: filterable project cards with the problem, what was built, the proof, and live/repo links.
+- **Research**: the M.S. thesis result drawn to scale, publications, education, awards.
+- **Shipping**: recent public GitHub pushes, refreshed hourly with ISR (no API call per visitor).
+- **⌘K command menu**, dark/light theme, reduced-motion support, OG image, JSON-LD, sitemap.
+
+## Architecture
+
+```
+src/
+├─ content/              distributed content graph (edit facts here)
+│  ├─ person.ts          identity, recruiter summary, headline stats
+│  ├─ roles.ts           roles -> org ids, highlight -> skill ids, project ids
+│  ├─ projects.ts        projects -> skill / role / award / event ids
+│  ├─ skills.ts          skill nodes + groups
+│  ├─ orgs.ts            companies and schools
+│  ├─ achievements.ts    awards, events, certifications
+│  ├─ research.ts        education, thesis, publications
+│  ├─ types.ts           node types
+│  └─ graph.ts           resolves edges, fails the build on a dangling id,
+│                        computes skill -> evidence backlinks, serializes
+│                        the graph as the AI's grounding context
+├─ lib/
+│  ├─ assistant.ts       system prompt + offline answerer + JD matcher
+│  ├─ rate-limit.ts      per-IP limits for /api/chat
+│  └─ github.ts          hourly-cached public repo feed
+├─ app/
+│  ├─ page.tsx           server component: joins graph views for the UI
+│  ├─ api/chat/route.ts  streams Gemini SSE as plain text; falls back offline
+│  ├─ api/health         Render health check
+│  └─ opengraph-image, sitemap, robots, icon
+└─ components/           Sidebar, Projects, Experience, SkillGraph,
+                         Research, GitHubFeed, Assistant, CommandPalette
+```
+
+**Design choices**
+
+- **Facts live in one graph, spread across files.** Nothing on the page or in the AI prompt is typed twice. A role highlight tagged `kafka` automatically shows up as Kafka evidence and in the assistant's context.
+- **The model can't drift from the page.** The system prompt is generated from the same graph the UI renders and tells the model to refuse anything not in it.
+- **The API key stays server-side** and is sent in a header, never in the URL. `/api/chat` is rate-limited per IP (8/min, 60/day), caps input size, and has a 20 s timeout.
+- **One Render web service.** `output: "standalone"` keeps the runtime small; the page is static with hourly revalidation.
+
+## Run locally
 
 ```bash
-pip install -r requirements.txt
-streamlit run app.py
+npm install
+npm run dev          # http://localhost:3000
+npm test             # content-graph integrity, assistant routing, JD matching, rate limiter
+npm run typecheck
+npm run build && npm start
 ```
 
-Open the local URL Streamlit prints in the terminal, usually:
+Copy `.env.example` to `.env.local`. Every variable is optional:
 
-```text
-http://localhost:8501
-```
+| Variable | Purpose |
+|---|---|
+| `GEMINI_API_KEY` | Enables live, streamed AI answers. Without it, the offline answerer is used. |
+| `GEMINI_MODEL` | Defaults to `gemini-2.5-flash`. |
+| `GITHUB_TOKEN` | Raises the GitHub API limit for the activity feed (read-only, public data). |
+| `NEXT_PUBLIC_SITE_URL` | Canonical URL for metadata and social cards. |
 
-## AI Assistant
+## Deploy on Render
 
-The homepage is the AI assistant. It can answer questions about Sameer's background, projects, skills, Salesforce credentials, research, education, contact details, and fit for a role.
+1. Render dashboard → **New → Blueprint** → select this repository. `render.yaml` defines the `genfolio` web service.
+2. Set `GEMINI_API_KEY` (optional) when Render asks for secret values.
+3. Every push to `main` redeploys. The health check is `/api/health`.
 
-It works in two modes:
+The free plan sleeps when idle, so the first visit after a while takes a few seconds; a paid instance avoids that.
 
-- Local fallback mode: always available, no API key required.
-- Live Gemini mode: enabled when `GEMINI_API_KEY` is configured.
+## Updating content
 
-Create `.env` from `.env.example` and set:
-
-```bash
-GEMINI_API_KEY=your_key_here
-GEMINI_MODEL=gemini-2.5-flash
-```
-
-The assistant uses `profile_context.py` as its grounded resume context and avoids inventing employers, dates, credentials, metrics, or project outcomes.
-
-## Project Structure
-
-```text
-.
-|-- app.py                      # Main Streamlit portfolio app
-|-- profile_context.py          # Resume context and AI system instruction
-|-- requirements.txt            # Python dependencies
-|-- .streamlit/config.toml      # Dark Streamlit theme defaults
-|-- assets/
-|   |-- generated/              # Previous generated graphics, no longer required by the main views
-|   |-- css/style.css           # Legacy static portfolio CSS
-|   |-- js/script.js            # Legacy static portfolio JS
-|   `-- images/                 # Portfolio images and icons
-|-- main.py                     # Legacy/optional FastAPI backend
-|-- api/                        # Legacy/optional Vercel serverless API
-|-- index.html                  # Legacy static portfolio
-`-- Profile (3).pdf             # Resume source file
-```
-
-## Design Direction
-
-- AI Chat is the default homepage.
-- Sidebar navigation exposes About, Resume, Projects, Research, and Contact.
-- Dark dev-tool theme with terminal panels, live signal panels, status chips, command prompts, and compact cards.
-- Responsive layout adapts across desktop, laptop, tablet, and phone widths.
-- CSS animations add typed assistant intros, panel scans, scroll reveals, pulsing status, chat message entry, and blinking cursor effects.
-- Contact flows emphasize email and LinkedIn outreach instead of a download-first resume path.
-
-## Legacy Static Site
-
-The static portfolio in `index.html`, `assets/css/style.css`, and `assets/js/script.js` has also been refreshed with live hero components and responsive navigation. The recommended viewing path is:
-
-```bash
-streamlit run app.py
-```
-
-## Contact
-
-- Email: nagarsam8989@gmail.com
-- LinkedIn: https://www.linkedin.com/in/aavonsameer/
-- GitHub: https://github.com/sameernagar-hub
-- Google Scholar: https://scholar.google.com/citations?user=FfTfe3gAAAAJ&hl=en
+Edit the files in `src/content/`. Reference other nodes by `id`; `npm test` and `npm run build` both fail if an id doesn't resolve.
+Keep claims provable: every number on the site comes from a role, project, or paper in the graph.
 
 ## License
 
-MIT. Original template attribution is preserved in `LICENSE`; portfolio modifications are attributed to Sameer Nagar.
+MIT © 2026 Sameer Nagar

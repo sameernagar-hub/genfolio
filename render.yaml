@@ -1,0 +1,29 @@
+# Render Blueprint: one Node web service serves the site and the /api/chat route.
+# New > Blueprint in the Render dashboard, point it at this repo, then fill the
+# secret env vars it asks for (GEMINI_API_KEY is optional).
+services:
+  - type: web
+    name: genfolio
+    runtime: node
+    plan: free
+    region: oregon
+    branch: main
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: HOSTNAME
+        value: 0.0.0.0
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+      - key: NEXT_PUBLIC_SITE_URL
+        value: https://genfolio.onrender.com
+      - key: GEMINI_MODEL
+        value: gemini-2.5-flash
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GITHUB_TOKEN
+        sync: false
