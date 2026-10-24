@@ -94,7 +94,7 @@ export function Assistant() {
           const err = await res.json().catch(() => ({}));
           throw new Error(err.error || "The assistant is unavailable right now.");
         }
-        setMode(res.headers.get("X-Assistant-Mode") === "live" ? "live" : "local");
+        setMode(res.headers.get("X-Assistant-Mode")?.startsWith("live") ? "live" : "local");
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
         for (;;) {

@@ -170,7 +170,7 @@ export default function Home() {
           <footer className="mt-16 text-sm text-faint">
             <p>
               Designed and built by {person.name} with Next.js, Tailwind, and Motion. No templates were harmed.{" "}
-              <a href="https://github.com/sameernagar-hub/portfolio.ai" target="_blank" rel="noreferrer" className="underline-offset-4 hover:text-fg hover:underline">
+              <a href="https://github.com/sameernagar-hub/genfolio" target="_blank" rel="noreferrer" className="underline-offset-4 hover:text-fg hover:underline">
                 Genfolio source
               </a>
               . Press <kbd className="rounded border border-line px-1 font-mono text-xs">⌘K</kbd> for shortcuts.

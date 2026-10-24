@@ -1,6 +1,6 @@
 # Render Blueprint: one Node web service serves the site and the /api/chat route.
 # New > Blueprint in the Render dashboard, point it at this repo, then fill the
-# secret env vars it asks for (GEMINI_API_KEY is optional).
+# secret env vars it asks for (GEMINI_API_KEY and GROQ_API_KEY are both optional).
 services:
   - type: web
     name: genfolio
@@ -21,9 +21,15 @@ services:
         value: "1"
       - key: NEXT_PUBLIC_SITE_URL
         value: https://genfolio.onrender.com
+      - key: AI_PROVIDER
+        value: gemini
       - key: GEMINI_MODEL
         value: gemini-2.5-flash
       - key: GEMINI_API_KEY
+        sync: false
+      - key: GROQ_MODEL
+        value: openai/gpt-oss-120b
+      - key: GROQ_API_KEY
         sync: false
       - key: GITHUB_TOKEN
         sync: false

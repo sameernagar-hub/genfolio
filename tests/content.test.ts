@@ -51,3 +51,24 @@ test("rate limiter blocks after the per-minute limit", () => {
   assert.ok(blocked.retryAfter > 0 && blocked.retryAfter <= 60);
   assert.equal(checkRate(key, t + 60_000).ok, true);
 });
+
+import { geminiText, openAiText, providers, sseData } from "../src/lib/llm.ts";
+
+test("providers: none without keys, placeholders ignored, AI_PROVIDER sets order", () => {
+  assert.deepEqual(providers({}), []);
+  assert.deepEqual(providers({ GEMINI_API_KEY: "paste-your-gemini-key-here", GROQ_API_KEY: "paste-your-groq-key-here" }), []);
+  const both = { GEMINI_API_KEY: "g", GROQ_API_KEY: "q" };
+  assert.deepEqual(providers(both).map((p) => p.name), ["gemini", "groq"]);
+  assert.deepEqual(providers({ ...both, AI_PROVIDER: "groq" }).map((p) => p.name), ["groq", "gemini"]);
+  assert.equal(providers({ GROQ_API_KEY: "q" })[0].model, "openai/gpt-oss-120b");
+});
+
+test("SSE parsing for Gemini and OpenAI-compatible (Groq) frames", async () => {
+  const raw = 'data: {"choices":[{"delta":{"content":"Hel"}}]}\n\ndata: {"choices":[{"delta":{"content":"lo"}}]}\n\ndata: [DONE]\n\n';
+  const body = new Blob([raw]).stream();
+  const frames: string[] = [];
+  for await (const f of sseData(body)) frames.push(f);
+  assert.equal(frames.map(openAiText).join(""), "Hello");
+  assert.equal(geminiText('{"candidates":[{"content":{"parts":[{"text":"Hi "},{"text":"there"}]}}]}'), "Hi there");
+  assert.equal(openAiText("not json"), "");
+});

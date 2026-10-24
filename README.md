@@ -9,7 +9,7 @@ And an AI you can interview, which only knows what's true.
 
 [**Live site**](https://genfolio.onrender.com) · [Resume (PDF)](public/Sameer_Nagar_Resume.pdf) · [LinkedIn](https://www.linkedin.com/in/aavonsameer/) · [Email](mailto:nagarsam8989@gmail.com)
 
-[![ci](https://github.com/sameernagar-hub/portfolio.ai/actions/workflows/ci.yml/badge.svg)](https://github.com/sameernagar-hub/portfolio.ai/actions/workflows/ci.yml)
+[![ci](https://github.com/sameernagar-hub/genfolio/actions/workflows/ci.yml/badge.svg)](https://github.com/sameernagar-hub/genfolio/actions/workflows/ci.yml)
 ![Next.js 16](https://img.shields.io/badge/Next.js-16-black)
 ![React 19](https://img.shields.io/badge/React-19-149eca)
 ![Tailwind v4](https://img.shields.io/badge/Tailwind-v4-38bdf8)
@@ -63,7 +63,7 @@ Five opinions, each backed by shipped work. The site renders them from [`src/con
 
 ## What's on the site
 
-- 🤖 **Interview my AI:** streaming assistant grounded in the content graph. Paste a job description and it lists matching skills with the role or project behind each. Gemini when a key is set, deterministic offline answers when not.
+- 🤖 **Interview my AI:** streaming assistant grounded in the content graph. Paste a job description and it lists matching skills with the role or project behind each. Runs on Gemini or Groq with automatic failover, and answers offline when no key is set.
 - 🧾 **Skills with receipts:** hover a skill to see the exact role, project, paper, or certification that proves it, ranked by independent sources.
 - ✨ **Motion-first, minimal text:** a scroll-lit About line, counting stats, a rotating headline, staggered headings, cards that tilt, thesis bars that grow. All of it falls back to static text with `prefers-reduced-motion`.
 - 🧭 **Recruiter-first layout:** sticky identity column (status, location, work authorization, resume) and a live section index.
@@ -80,7 +80,7 @@ flowchart LR
   content --> graph["graph.ts<br/>validate ids · backlinks · AI context"]
   graph --> page["page.tsx<br/>server component, ISR 1h"]
   graph --> ai["lib/assistant.ts<br/>system prompt + offline answers + JD match"]
-  ai --> chat["/api/chat<br/>Gemini SSE → text stream<br/>rate limit · timeout"]
+  ai --> chat["/api/chat<br/>Gemini ⇄ Groq failover → text stream<br/>rate limit · timeout"]
   gh["GitHub API"] --> page
   page --> ui["Sidebar · Principles · Projects · Experience<br/>SkillGraph · Research · Assistant · ⌘K"]
 ```
@@ -95,7 +95,7 @@ flowchart LR
 ```
 src/
 ├─ content/      person · roles · projects · skills · principles · research · achievements · orgs · graph
-├─ lib/          assistant · rate-limit · github · site
+├─ lib/          assistant · llm (Gemini, Groq) · rate-limit · github · site
 ├─ app/          page · layout · api/chat · api/health · opengraph-image · sitemap · robots
 └─ components/   Sidebar · Principles · Projects · Experience · SkillGraph · Research
                  GitHubFeed · Assistant · CommandPalette · motion (primitives) · ui
@@ -115,15 +115,19 @@ Copy `.env.example` to `.env.local`. Every variable is optional.
 
 | Variable | Purpose |
 |---|---|
-| `GEMINI_API_KEY` | Live, streamed AI answers. Without it, the offline answerer is used. |
-| `GEMINI_MODEL` | Defaults to `gemini-2.5-flash`. |
+| `GEMINI_API_KEY` | Gemini key ([get one](https://aistudio.google.com/apikey)). Enables live, streamed answers. |
+| `GROQ_API_KEY` | Groq key ([get one](https://console.groq.com/keys)). Second provider, or the first if `AI_PROVIDER=groq`. |
+| `AI_PROVIDER` | `gemini` or `groq`: which answers first. The other takes over automatically if the first fails. |
+| `GEMINI_MODEL` / `GROQ_MODEL` | Defaults: `gemini-2.5-flash` / `openai/gpt-oss-120b`. |
 | `GITHUB_TOKEN` | Higher GitHub API limit for the shipping log (read-only, public data). |
 | `NEXT_PUBLIC_SITE_URL` | Canonical URL for metadata and social cards. |
+
+With no AI key, the assistant still works: it answers from the content graph offline. Check what's active at `/api/health`.
 
 ## Deploy on Render
 
 1. Render dashboard → **New → Blueprint** → pick this repo. [`render.yaml`](render.yaml) defines the `genfolio` web service.
-2. Add `GEMINI_API_KEY` (optional) when Render asks for secrets.
+2. Paste `GEMINI_API_KEY` and/or `GROQ_API_KEY` when Render asks for secrets (both optional).
 3. Every push to `main` redeploys; health check is `/api/health`.
 
 The free plan sleeps when idle, so the first visit after a quiet spell takes a few seconds.
