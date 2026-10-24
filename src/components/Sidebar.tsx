@@ -4,7 +4,7 @@
 // inspired by brittanychiang.com: who, what, where, then a live section index.
 
 import { ArrowDownToLine, ArrowRight, ArrowUpRight, Command, FileSearch, Mail, Sparkles } from "lucide-react";
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { person, recruiter } from "@/content/person";
 import { sections } from "@/lib/site";
@@ -12,7 +12,6 @@ import { GitHubIcon, LinkedInIcon, ScholarIcon } from "./icons";
 import { Rotator } from "./motion";
 import { askAssistant, CopyButton, ThemeToggle } from "./ui";
 
-const ease = [0.22, 1, 0.36, 1] as const;
 
 function useActiveSection() {
   const [active, setActive] = useState<string>(sections[0].id);
@@ -32,10 +31,10 @@ function useActiveSection() {
 }
 
 export function Sidebar({ nowLabel, building }: { nowLabel: string; building: { name: string; href: string } }) {
-  const reduce = useReducedMotion();
   const active = useActiveSection();
-  const rise = (delay: number) =>
-    reduce ? {} : { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.7, delay, ease } };
+  // CSS-driven entrance (see [data-rise] in globals.css): plays before hydration,
+  // so the hero is never invisible while JavaScript loads.
+  const rise = (delay: number) => ({ "data-rise": "", style: { animationDelay: `${delay}s` } });
 
   return (
     <header className="pt-16 pb-6 [scrollbar-width:none] lg:sticky lg:top-0 lg:flex lg:max-h-dvh lg:w-[44%] lg:flex-col lg:justify-between lg:overflow-y-auto lg:py-14">

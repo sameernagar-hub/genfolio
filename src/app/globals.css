@@ -100,6 +100,22 @@ body {
   opacity: 1;
 }
 
+/* Until hydration, never let an animation's starting state hide server-rendered
+   content (slow phones, cold starts, crawlers). Motion takes over afterwards. */
+html:not(.hydrated) [style*="opacity:0"] {
+  opacity: 1 !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+/* Hero entrance: pure CSS so it never depends on hydration. */
+[data-rise] {
+  animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(20px); }
+}
+
 @keyframes marquee {
   to { transform: translateX(-50%); }
 }

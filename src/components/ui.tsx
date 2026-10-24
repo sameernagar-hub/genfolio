@@ -3,7 +3,7 @@
 import { Check, Copy, Moon, Sun } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { SplitText } from "./motion";
+import { SplitText, useEntrance } from "./motion";
 
 /** Opens the assistant (and optionally asks a question) from anywhere on the page. */
 export function askAssistant(prompt?: string) {
@@ -11,18 +11,25 @@ export function askAssistant(prompt?: string) {
 }
 
 export function Reveal({ children, delay = 0, className }: { children: ReactNode; delay?: number; className?: string }) {
-  const reduce = useReducedMotion();
+  const ref = useRef<HTMLDivElement>(null);
+  const state = useEntrance(ref);
   return (
     <motion.div
+      ref={ref}
       className={className}
-      initial={reduce ? false : { opacity: 0, y: 18, filter: "blur(6px)" }}
-      whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-      viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: 0.55, delay, ease: [0.22, 1, 0.36, 1] }}
+      initial={false}
+      animate={state === "hidden" ? { opacity: 0, y: 18, filter: "blur(6px)" } : { opacity: 1, y: 0, filter: "blur(0px)" }}
+      transition={state === "reveal" ? { duration: 0.55, delay, ease: [0.22, 1, 0.36, 1] } : { duration: 0 }}
     >
       {children}
     </motion.div>
   );
+}
+
+/** Marks the page hydrated; until then CSS keeps server-rendered content visible. */
+export function Hydrated() {
+  useEffect(() => document.documentElement.classList.add("hydrated"), []);
+  return null;
 }
 
 /** Card with a cursor-following glow (see .spotlight in globals.css). */

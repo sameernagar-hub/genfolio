@@ -22,6 +22,14 @@ And an AI you can interview, which only knows what's true.
 
 ---
 
+## The live site
+
+<p align="center">
+  <a href="https://genfolio-i7bx.onrender.com"><img src="docs/screenshot-desktop.png" alt="Genfolio on desktop: sticky identity column, scroll-lit About, counting stats" width="72%"/></a>
+  &nbsp;
+  <a href="https://genfolio-i7bx.onrender.com"><img src="docs/screenshot-mobile.png" alt="Genfolio on mobile" width="24%"/></a>
+</p>
+
 ## Hiring? Start here.
 
 **Sameer Nagar**: software engineer who builds backend systems and AI products that hold up in production.
@@ -74,15 +82,22 @@ Five opinions, each backed by shipped work. The site renders them from [`src/con
 
 ```mermaid
 flowchart LR
-  subgraph content["src/content · distributed graph"]
-    person & roles & projects & skills & principles & research & achievements & orgs
+  subgraph content["src/content: distributed graph"]
+    person
+    roles
+    projects
+    skills
+    principles
+    research
+    achievements
+    orgs
   end
-  content --> graph["graph.ts<br/>validate ids · backlinks · AI context"]
-  graph --> page["page.tsx<br/>server component, ISR 1h"]
-  graph --> ai["lib/assistant.ts<br/>system prompt + offline answers + JD match"]
-  ai --> chat["/api/chat<br/>Gemini ⇄ Groq failover → text stream<br/>rate limit · timeout"]
-  gh["GitHub API"] --> page
-  page --> ui["Sidebar · Principles · Projects · Experience<br/>SkillGraph · Research · Assistant · ⌘K"]
+  content --> resolver["graph.ts<br/>validates ids, backlinks, AI context"]
+  resolver --> pageNode["page.tsx<br/>server component, ISR 1h"]
+  resolver --> assistant["lib/assistant.ts<br/>prompt, guardrails, offline answers, JD match"]
+  assistant --> chat["api/chat<br/>Gemini / Groq failover, streamed text<br/>rate limit, leak guard, cache"]
+  github["GitHub API"] --> pageNode
+  pageNode --> ui["Sidebar, Principles, Projects, Experience<br/>SkillGraph, Research, Assistant, Cmd+K"]
 ```
 
 **Why it's built this way**

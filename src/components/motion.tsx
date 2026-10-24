@@ -9,6 +9,33 @@ import {
 } from "motion/react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
+/**
+ * Entrance state that never hides server-rendered content. Elements start
+ * "shown" (so HTML is readable before and without JavaScript); after mount,
+ * only those below the fold are hidden, then revealed when scrolled into view.
+ */
+export function useEntrance<T extends Element>(ref: React.RefObject<T | null>, margin = "-60px") {
+  const reduce = useReducedMotion();
+  const [state, setState] = useState<"shown" | "hidden" | "reveal">("shown");
+  useEffect(() => {
+    const el = ref.current;
+    if (reduce || !el || el.getBoundingClientRect().top < window.innerHeight * 0.92) return;
+    setState("hidden");
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) {
+          setState("reveal");
+          io.disconnect();
+        }
+      },
+      { rootMargin: `0px 0px ${margin} 0px` },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [reduce, ref, margin]);
+  return state;
+}
+
 /** Thin bar across the top showing read progress. */
 export function ScrollProgress() {
   const { scrollYProgress } = useScroll();
@@ -122,23 +149,23 @@ export function Rotator({ words, interval = 2400, className = "" }: { words: str
 
 /** Heading whose words rise in, staggered, when scrolled into view. */
 export function SplitText({ text, as: Tag = "h2", className = "" }: { text: string; as?: "h1" | "h2" | "h3" | "p"; className?: string }) {
-  const reduce = useReducedMotion();
+  const ref = useRef<HTMLHeadingElement>(null);
+  const state = useEntrance(ref, "-40px");
   const MotionTag = motion[Tag];
-  if (reduce) return <Tag className={className}>{text}</Tag>;
   return (
     <MotionTag
+      ref={ref}
       className={className}
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: true, margin: "-40px" }}
-      transition={{ staggerChildren: 0.06 }}
+      initial={false}
+      animate={state === "hidden" ? "hidden" : "show"}
+      transition={{ staggerChildren: state === "reveal" ? 0.06 : 0 }}
       aria-label={text}
     >
       {text.split(" ").map((w, i) => (
         <span key={i} className="inline-block overflow-hidden pb-[0.08em] align-bottom" aria-hidden>
           <motion.span
             className="inline-block"
-            variants={{ hidden: { y: "110%" }, show: { y: "0%", transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } } }}
+            variants={{ hidden: { y: "110%", transition: { duration: 0 } }, show: { y: "0%", transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } } }}
           >
             {w}
             {" "}

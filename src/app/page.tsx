@@ -15,7 +15,7 @@ import { Research } from "@/components/Research";
 import { Sidebar } from "@/components/Sidebar";
 import { SkillGraph, type SkillView } from "@/components/SkillGraph";
 import { ScrollProgress, ScrollWords, SplitText } from "@/components/motion";
-import { CopyButton, Reveal, SectionHeader } from "@/components/ui";
+import { CopyButton, Hydrated, Reveal, SectionHeader } from "@/components/ui";
 
 // Re-render at most hourly so the GitHub feed stays fresh without an API call per visit.
 export const revalidate = 3600;
@@ -75,6 +75,7 @@ export default function Home() {
       <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[70] focus:rounded-lg focus:bg-fg focus:px-3 focus:py-2 focus:text-bg">
         Skip to content
       </a>
+      <Hydrated />
       <ScrollProgress />
       <div className="grid-bg pointer-events-none fixed inset-x-0 top-0 -z-10 h-[70vh]" />
       <div className="pointer-events-none fixed -top-48 -left-40 -z-10 h-[560px] w-[760px] rounded-full bg-[radial-gradient(closest-side,color-mix(in_oklab,var(--accent)_18%,transparent),transparent)] blur-2xl" />
