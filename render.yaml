@@ -20,7 +20,7 @@ services:
       - key: NEXT_TELEMETRY_DISABLED
         value: "1"
       - key: NEXT_PUBLIC_SITE_URL
-        value: https://genfolio.onrender.com
+        value: https://genfolio-i7bx.onrender.com
       - key: AI_PROVIDER
         value: gemini
       - key: GEMINI_MODEL

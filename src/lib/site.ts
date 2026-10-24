@@ -1,6 +1,6 @@
 export const site = {
   name: "Genfolio",
-  url: (process.env.NEXT_PUBLIC_SITE_URL || "https://genfolio.onrender.com").replace(/\/$/, ""),
+  url: (process.env.NEXT_PUBLIC_SITE_URL || "https://genfolio-i7bx.onrender.com").replace(/\/$/, ""),
 };
 
 export const sections = [

@@ -7,7 +7,7 @@
 Every claim links to its evidence. Every skill shows where it was used.<br/>
 And an AI you can interview, which only knows what's true.
 
-[**Live site**](https://genfolio.onrender.com) · [Resume (PDF)](public/Sameer_Nagar_Resume.pdf) · [LinkedIn](https://www.linkedin.com/in/aavonsameer/) · [Email](mailto:nagarsam8989@gmail.com)
+[**Live site**](https://genfolio-i7bx.onrender.com) · [Resume (PDF)](public/Sameer_Nagar_Resume.pdf) · [LinkedIn](https://www.linkedin.com/in/aavonsameer/) · [Email](mailto:nagarsam8989@gmail.com)
 
 [![ci](https://github.com/sameernagar-hub/genfolio/actions/workflows/ci.yml/badge.svg)](https://github.com/sameernagar-hub/genfolio/actions/workflows/ci.yml)
 ![Next.js 16](https://img.shields.io/badge/Next.js-16-black)
@@ -16,7 +16,7 @@ And an AI you can interview, which only knows what's true.
 ![Render](https://img.shields.io/badge/deploy-Render-46e3b7)
 ![MIT](https://img.shields.io/badge/license-MIT-blue)
 
-<a href="https://genfolio.onrender.com"><img src="docs/preview.png" alt="Genfolio: Sameer Nagar, software engineer" width="760"/></a>
+<a href="https://genfolio-i7bx.onrender.com"><img src="docs/preview.png" alt="Genfolio: Sameer Nagar, software engineer" width="760"/></a>
 
 </div>
 
@@ -36,7 +36,7 @@ And an AI you can interview, which only knows what's true.
 | 🏆 **Proof** | 2× first-place hackathons · 5× Salesforce certified · 2 peer-reviewed papers |
 | 🪪 **Work authorization** | F-1 OPT (STEM extension eligible); will need sponsorship in the future |
 
-**Three ways in:** [open the site](https://genfolio.onrender.com) → *Interview my AI* or *Match your JD* → [email](mailto:nagarsam8989@gmail.com).
+**Three ways in:** [open the site](https://genfolio-i7bx.onrender.com) → *Interview my AI* or *Match your JD* → [email](mailto:nagarsam8989@gmail.com).
 
 ## How I build
 
