@@ -59,10 +59,20 @@ export function CountUp({ value, className = "" }: { value: string; className?: 
   const inView = useInView(ref, { once: true, margin: "-40px" });
   const reduce = useReducedMotion();
   const match = value.match(/^([^\d]*)([\d.]+)(.*)$/);
-  const [shown, setShown] = useState(match && !reduce ? `${match[1]}0${match[3]}` : value);
+  // Server HTML always carries the real number (crawlers, link previews, no-JS).
+  // After hydration each counter resets to zero and counts up when it scrolls into view.
+  const [shown, setShown] = useState(value);
+  const [armed, setArmed] = useState(false);
 
   useEffect(() => {
-    if (!inView || !match || reduce) return;
+    if (!match || reduce) return;
+    setShown(`${match[1]}0${match[3]}`);
+    setArmed(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!inView || !match || reduce || !armed) return;
     const target = parseFloat(match[2]);
     const decimals = match[2].includes(".") ? match[2].split(".")[1].length : 0;
     const controls = animate(0, target, {
@@ -72,7 +82,7 @@ export function CountUp({ value, className = "" }: { value: string; className?: 
     });
     return () => controls.stop();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inView]);
+  }, [inView, armed]);
 
   return (
     <span ref={ref} className={`tabular-nums ${className}`}>

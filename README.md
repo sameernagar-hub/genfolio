@@ -134,11 +134,23 @@ With no AI key, the assistant still works: it answers from the content graph off
 
 ## Deploy on Render
 
-1. Render dashboard → **New → Blueprint** → pick this repo. [`render.yaml`](render.yaml) defines the `genfolio` web service.
-2. Paste `GEMINI_API_KEY` and/or `GROQ_API_KEY` when Render asks for secrets (both optional).
-3. Every push to `main` redeploys; health check is `/api/health`.
+Live at **[genfolio-i7bx.onrender.com](https://genfolio-i7bx.onrender.com)** (Render web service, free plan, Oregon).
 
-The free plan sleeps when idle, so the first visit after a quiet spell takes a few seconds.
+**Option A: Blueprint.** New → Blueprint → pick this repo; [`render.yaml`](render.yaml) sets everything below.
+
+**Option B: manual web service** (how the live site runs):
+
+| Setting | Value |
+|---|---|
+| Runtime | Node |
+| Build command | `npm install; npm run build` |
+| Start command | `npm run start` |
+| Health check path | `/api/health` |
+| Environment | `GEMINI_API_KEY`, `GROQ_API_KEY` (both optional), `GITHUB_TOKEN` (optional) |
+
+> **Gotcha we hit:** Render sets `HOSTNAME` to the container's name, and the Next.js standalone server listens on `$HOSTNAME`, so the proxy returns **502**. `npm run start` runs [`scripts/start.mjs`](scripts/start.mjs), which always binds `0.0.0.0` (override with `BIND_HOST`).
+
+Every push to `main` redeploys. The free plan sleeps when idle, so the first visit after a quiet spell takes ~30–60 s.
 
 ## Make it yours
 
