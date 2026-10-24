@@ -9,6 +9,7 @@ export const roles: Role[] = [
     end: "Present",
     current: true,
     summary: "Own the GenAI services and ship core platform microservices for a nonprofit community-help platform.",
+    impact: ["5 microservices on EKS", "First green deploy in months", "RAG + evals in prod"],
     highlights: [
       {
         text: "Built and deployed 5 Spring Boot 3 / JDK 17 microservices with Kafka event streaming on AWS EKS, covering volunteer, request, analytics, and AI domains.",
@@ -43,6 +44,7 @@ export const roles: Role[] = [
     start: "Jul 2026",
     end: "Aug 2026",
     summary: "Research internship on open-source US consumer tax and bookkeeping tooling and its programmatic integration surfaces.",
+    impact: ["4 platforms evaluated", "+20% data interchange", "Open-sourced"],
     highlights: [
       {
         text: "Evaluated 4 financial platforms (GnuCash, Beancount, hledger, OpenTaxSolver) for API extensibility and integration coverage.",
@@ -57,11 +59,13 @@ export const roles: Role[] = [
   },
   {
     id: "csuf-ta",
+    timeline: false,
     org: "csuf-org",
     title: "Teaching Associate, Operating Systems",
     start: "Aug 2024",
     end: "May 2026",
     summary: "Taught Operating Systems all four semesters, first as a student mentor and then as a Teaching Associate.",
+    impact: ["100+ students", "4 semesters of OS"],
     highlights: [
       {
         text: "Led technical instruction for 100+ CS students across advanced systems coursework: processes, threads, scheduling, interrupts, concurrency, memory, and I/O.",
@@ -77,6 +81,7 @@ export const roles: Role[] = [
     start: "Nov 2021",
     end: "May 2024",
     summary: "Shipped client-facing enterprise products end to end, from design through production support.",
+    impact: ["15+ production APIs", "99.9% uptime · 50+ clients", "−40% manual effort"],
     highlights: [
       {
         text: "Delivered 15+ production REST APIs and full-stack features for client-facing enterprise products, owning design through release.",

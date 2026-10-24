@@ -5,6 +5,7 @@ export const site = {
 
 export const sections = [
   { id: "about", label: "About" },
+  { id: "approach", label: "Approach" },
   { id: "work", label: "Work" },
   { id: "experience", label: "Experience" },
   { id: "skills", label: "Skills" },

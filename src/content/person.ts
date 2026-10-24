@@ -17,11 +17,18 @@ export const person = {
     scholar: "https://scholar.google.com/citations?user=FfTfe3gAAAAJ&hl=en",
   },
   now: "saayam", // -> Role.id
+  building: "regen", // -> Project.id, shown as "building in public"
+  /** Headline keywords the sidebar cycles through. */
+  rotating: ["backend systems", "AI products", "event pipelines", "Salesforce automation"],
+  /** One scroll-revealed line instead of an About essay. `*word*` = accent. */
+  about:
+    "I build the unglamorous half of software, the part that has to be *correct* at 3 a.m. Then I make AI *show* *its* *work*: every score cites evidence, every claim has a receipt.",
 };
 
 export const recruiter = {
   targetRoles: ["Software Engineer (Backend / Full-Stack)", "AI / LLM Engineer", "Salesforce Developer"],
   availability: "Open to full-time roles, available now",
+  workAuthShort: "US work authorized · F-1 OPT, STEM eligible",
   workAuth: "Authorized to work in the US on F-1 OPT (STEM extension eligible); will need sponsorship in the future.",
   location: "San Jose, CA · open to relocation and onsite work",
   pitch:

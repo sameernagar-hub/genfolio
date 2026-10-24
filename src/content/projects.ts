@@ -118,18 +118,4 @@ export const projects: Project[] = [
     repo: "https://github.com/sameernagar-hub/Open-Source-Tax-Tooling",
     live: "https://executionlab.vercel.app",
   },
-  {
-    id: "titan",
-    name: "Titan Smart Scheduler",
-    tagline: "Fair, student-aware shift scheduling",
-    year: "2026",
-    category: "Platforms",
-    problem: "Campus shift schedules ignore class conflicts and leave no backup coverage.",
-    built: [
-      "Flask web app that balances workload, prevents academic conflicts, and keeps backup coverage with risk-aware optimization.",
-    ],
-    proof: "Open source",
-    skills: ["python", "flask"],
-    repo: "https://github.com/sameernagar-hub/titan-smart-scheduler",
-  },
 ];

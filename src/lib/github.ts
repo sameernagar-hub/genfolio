@@ -27,7 +27,7 @@ export async function recentRepos(limit = 6): Promise<Repo[]> {
     if (!res.ok) return [];
     const data = (await res.json()) as Array<Record<string, unknown>>;
     return data
-      .filter((r) => !r.fork && !r.private && r.name !== user)
+      .filter((r) => !r.fork && !r.private && r.name !== user && typeof r.description === "string" && r.description.trim() !== "")
       .slice(0, limit)
       .map((r) => ({
         name: String(r.name),

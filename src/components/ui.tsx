@@ -3,6 +3,7 @@
 import { Check, Copy, Moon, Sun } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { SplitText } from "./motion";
 
 /** Opens the assistant (and optionally asks a question) from anywhere on the page. */
 export function askAssistant(prompt?: string) {
@@ -84,11 +85,11 @@ export function CopyButton({ value, label, className = "" }: { value: string; la
   );
 }
 
-export function SectionHeader({ eyebrow, title, intro }: { eyebrow: string; title: ReactNode; intro?: ReactNode }) {
+export function SectionHeader({ eyebrow, title, intro }: { eyebrow: string; title: string; intro?: ReactNode }) {
   return (
-    <Reveal className="mb-10 max-w-2xl">
+    <Reveal className="mb-8 max-w-2xl">
       <p className="font-mono text-xs uppercase tracking-[0.18em] text-accent">{eyebrow}</p>
-      <h2 className="mt-3 text-3xl font-semibold tracking-tight text-balance sm:text-4xl">{title}</h2>
+      <SplitText text={title} className="mt-3 text-3xl font-semibold tracking-tight text-balance sm:text-4xl" />
       {intro && <p className="mt-4 text-pretty text-muted">{intro}</p>}
     </Reveal>
   );

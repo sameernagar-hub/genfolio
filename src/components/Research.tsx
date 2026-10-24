@@ -1,5 +1,6 @@
 import { ArrowUpRight, BookOpen, GraduationCap, Trophy } from "lucide-react";
 import { awards, certifications, education, educationOrg, eventOf, publications, thesis } from "@/content/graph";
+import { CountUp, GrowBar } from "./motion";
 import { Reveal } from "./ui";
 
 /** Before/after bars for the thesis result, drawn to scale. */
@@ -22,15 +23,17 @@ function FprChart() {
               <span className="font-mono font-semibold">{r.value.toFixed(3)}</span>
             </div>
             <div className="mt-1.5 h-2.5 rounded-full bg-surface-2">
-              <div className={`h-full rounded-full ${r.tone}`} style={{ width: `${Math.max(r.value * 100, 1.2)}%` }} />
+              <GrowBar pct={Math.max(r.value * 100, 1.2)} className={r.tone} />
             </div>
           </div>
         ))}
       </div>
-      <p className="mt-4 text-sm">
-        <span className="font-mono font-semibold text-accent-2">38× fewer false alarms</span>
-        <span className="text-muted"> at 0.847 accuracy, evaluated across hosts and under drift.</span>
-      </p>
+      <div className="mt-6 flex items-end gap-3">
+        <span className="font-mono text-5xl font-semibold tracking-tight text-accent-2">
+          <CountUp value="38×" />
+        </span>
+        <span className="pb-1.5 text-sm text-muted">fewer false alarms, at 0.847 accuracy, across hosts and drift.</span>
+      </div>
     </figure>
   );
 }
@@ -42,10 +45,7 @@ export function Research() {
         <article className="rounded-2xl border border-line bg-surface p-6">
           <p className="font-mono text-xs text-faint">M.S. Thesis · CSUF · 2026</p>
           <h3 className="mt-2 text-xl font-semibold tracking-tight text-balance">{thesis.title}</h3>
-          <p className="mt-2 text-sm text-pretty text-muted">
-            Operators stop trusting a detector the moment it cries wolf. This work detects anomalous OS behavior from system-call traces and
-            keeps working when it moves to a new host or the workload drifts.
-          </p>
+          <p className="mt-2 text-sm text-pretty text-muted">A detector that cries wolf gets muted. This one mostly doesn&apos;t.</p>
           <FprChart />
           <a
             href="https://github.com/sameernagar-hub/anomaly-detection-workbench"
@@ -100,6 +100,8 @@ export function Research() {
                 </li>
               ))}
             </ul>
+            <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.14em] text-faint">Taught</p>
+            <p className="mt-1 text-sm text-muted">Operating Systems at CSUF, 4 semesters, 100+ students</p>
             <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.14em] text-faint">Salesforce certified ×5</p>
             <p className="mt-1 text-sm text-muted">{certifications.map((c) => c.name).join(" · ")}</p>
           </div>

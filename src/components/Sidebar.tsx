@@ -3,12 +3,13 @@
 // Sticky identity column (desktop) / stacked intro (mobile). Layout pattern
 // inspired by brittanychiang.com: who, what, where, then a live section index.
 
-import { ArrowDownToLine, ArrowRight, Command, FileSearch, Mail, Sparkles } from "lucide-react";
+import { ArrowDownToLine, ArrowRight, ArrowUpRight, Command, FileSearch, Mail, Sparkles } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { useEffect, useState } from "react";
 import { person, recruiter } from "@/content/person";
 import { sections } from "@/lib/site";
 import { GitHubIcon, LinkedInIcon, ScholarIcon } from "./icons";
+import { Rotator } from "./motion";
 import { askAssistant, CopyButton, ThemeToggle } from "./ui";
 
 const ease = [0.22, 1, 0.36, 1] as const;
@@ -30,7 +31,7 @@ function useActiveSection() {
   return active;
 }
 
-export function Sidebar({ nowLabel }: { nowLabel: string }) {
+export function Sidebar({ nowLabel, building }: { nowLabel: string; building: { name: string; href: string } }) {
   const reduce = useReducedMotion();
   const active = useActiveSection();
   const rise = (delay: number) =>
@@ -52,15 +53,24 @@ export function Sidebar({ nowLabel }: { nowLabel: string }) {
           Now: {nowLabel}
           <ArrowRight className="size-3" />
         </motion.a>
+        <motion.a
+          {...rise(0.03)}
+          href={building.href}
+          target="_blank"
+          rel="noreferrer"
+          className="mt-2 ml-0 inline-flex items-center gap-2 rounded-full border border-line bg-surface/60 px-3 py-1 text-xs text-muted backdrop-blur transition hover:text-fg sm:ml-2"
+        >
+          <span className="font-mono text-accent">&gt;_</span> Building in public: {building.name}
+          <ArrowUpRight className="size-3" />
+        </motion.a>
 
         <motion.h1 {...rise(0.05)} className="mt-5 text-5xl font-semibold tracking-[-0.04em] sm:text-6xl lg:text-[3.4rem]">
           {person.name}
         </motion.h1>
-        <motion.p {...rise(0.1)} className="mt-3 text-xl font-medium tracking-tight text-balance sm:text-2xl">
-          Backend systems and AI products that <span className="text-gradient">hold up in production.</span>
-        </motion.p>
-        <motion.p {...rise(0.15)} className="mt-4 max-w-md text-pretty text-muted">
-          {recruiter.pitch}
+        <motion.p {...rise(0.1)} className="mt-3 text-xl font-medium tracking-tight sm:text-2xl">
+          I build <Rotator words={person.rotating} />
+          <br />
+          that hold up in production.
         </motion.p>
 
         <motion.div {...rise(0.2)} className="mt-7 flex flex-wrap gap-2">
@@ -92,7 +102,7 @@ export function Sidebar({ nowLabel }: { nowLabel: string }) {
           </div>
           <div className="flex gap-2">
             <dt className="w-16 shrink-0 font-mono text-[11px] uppercase leading-5 tracking-[0.12em] text-faint">Visa</dt>
-            <dd>{recruiter.workAuth}</dd>
+            <dd>{recruiter.workAuthShort}</dd>
           </div>
         </motion.dl>
 

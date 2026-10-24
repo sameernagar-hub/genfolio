@@ -1,5 +1,6 @@
 import { stats } from "@/content/person";
 import { rankedSkills } from "@/content/graph";
+import { CountUp } from "./motion";
 import { Reveal } from "./ui";
 
 /** Numbers grid + a marquee of the most-evidenced skills. */
@@ -10,7 +11,9 @@ export function Proof() {
       <div className="grid grid-cols-2 gap-px bg-line sm:grid-cols-3">
         {stats.map((s, i) => (
           <Reveal key={s.label} delay={i * 0.04} className="bg-surface px-4 py-5">
-            <p className="font-mono text-xl font-semibold tracking-tight sm:text-2xl">{s.value}</p>
+            <p className="font-mono text-xl font-semibold tracking-tight sm:text-2xl">
+              <CountUp value={s.value} />
+            </p>
             <p className="mt-1 text-xs leading-snug text-muted sm:text-[13px]">{s.label}</p>
           </Reveal>
         ))}

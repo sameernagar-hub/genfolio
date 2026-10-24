@@ -1,6 +1,6 @@
 import { ArrowDownToLine, ArrowUpRight, Mail, Sparkles } from "lucide-react";
 import {
-  awardOf, eventOf, evidenceBySkill, orgOf, person, projects, projectsForRole, rankedSkills, roleOf, roles, skillOf,
+  awardOf, eventOf, evidenceBySkill, orgOf, person, principles, projectOf, projects, projectsForRole, rankedSkills, roleOf, roles, skillOf,
 } from "@/content/graph";
 import { groupLabels } from "@/content/skills";
 import { Assistant } from "@/components/Assistant";
@@ -8,11 +8,13 @@ import { AskButton } from "@/components/AskButton";
 import { CommandPalette } from "@/components/CommandPalette";
 import { Experience, type RoleView } from "@/components/Experience";
 import { GitHubFeed } from "@/components/GitHubFeed";
+import { Principles, type PrincipleView } from "@/components/Principles";
 import { Projects, type ProjectView } from "@/components/Projects";
 import { Proof } from "@/components/Proof";
 import { Research } from "@/components/Research";
 import { Sidebar } from "@/components/Sidebar";
 import { SkillGraph, type SkillView } from "@/components/SkillGraph";
+import { ScrollProgress, ScrollWords, SplitText } from "@/components/motion";
 import { CopyButton, Reveal, SectionHeader } from "@/components/ui";
 
 // Re-render at most hourly so the GitHub feed stays fresh without an API call per visit.
@@ -32,7 +34,20 @@ export default function Home() {
     };
   });
 
-  const roleViews: RoleView[] = roles.map((r) => {
+  const principleViews: PrincipleView[] = principles.map((p) => ({
+    id: p.id,
+    title: p.title,
+    line: p.line,
+    proof: p.proof.map((pr) => {
+      const proj = pr.project ? projectOf(pr.project) : undefined;
+      const role = pr.role ? roleOf(pr.role) : undefined;
+      return { label: proj?.name ?? (role ? orgOf(role).name : ""), note: pr.note, href: proj ? (proj.live ?? proj.repo) : undefined };
+    }),
+  }));
+
+  const building = projectOf(person.building)!;
+
+  const roleViews: RoleView[] = roles.filter((r) => r.timeline !== false).map((r) => {
     const org = orgOf(r);
     const stack = [...new Set(r.highlights.flatMap((h) => h.skills))].map((s) => skillOf(s)!.label).slice(0, 8);
     return {
@@ -44,6 +59,7 @@ export default function Home() {
       end: r.end,
       current: r.current,
       summary: r.summary,
+      impact: r.impact,
       highlights: r.highlights.map((h) => h.text),
       stack,
       projects: projectsForRole(r.id).map((p) => ({ name: p.name, href: p.live ?? p.repo })),
@@ -59,47 +75,38 @@ export default function Home() {
       <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[70] focus:rounded-lg focus:bg-fg focus:px-3 focus:py-2 focus:text-bg">
         Skip to content
       </a>
+      <ScrollProgress />
       <div className="grid-bg pointer-events-none fixed inset-x-0 top-0 -z-10 h-[70vh]" />
       <div className="pointer-events-none fixed -top-48 -left-40 -z-10 h-[560px] w-[760px] rounded-full bg-[radial-gradient(closest-side,color-mix(in_oklab,var(--accent)_18%,transparent),transparent)] blur-2xl" />
 
       <div className="mx-auto min-h-dvh max-w-6xl px-5 sm:px-8 lg:flex lg:justify-between lg:gap-12 lg:px-10">
-        <Sidebar nowLabel={nowLabel} />
+        <Sidebar nowLabel={nowLabel} building={{ name: building.name, href: building.live ?? building.repo! }} />
 
         <main id="main" className="pb-28 lg:w-[54%] lg:py-20">
           <section id="about" aria-label="About" className="scroll-mt-16">
             <Reveal>
               <p className="font-mono text-xs uppercase tracking-[0.18em] text-accent">About</p>
-              <div className="mt-4 space-y-4 text-pretty text-muted">
-                <p>
-                  I&apos;m a full-stack engineer who likes the unglamorous half of software: the part that has to be correct at 3 a.m. At{" "}
-                  <span className="text-fg">Unthinkable Solutions</span> that meant 15+ production APIs and 99.9% uptime for 50+ enterprise clients. At{" "}
-                  <span className="text-fg">Saayam For All</span> it means 5 Spring Boot microservices on EKS, the GenAI services, and the CI/CD that ships them.
-                </p>
-                <p>
-                  On the AI side I build systems that have to show their work: a review pipeline where every score cites evidence, a memory layer that
-                  un-learns poisoned facts, and a job engine that refuses to write a resume claim it can&apos;t prove. My M.S. thesis cut a detector&apos;s
-                  false alarms 38×, which taught me to distrust any number without an eval behind it.
-                </p>
-                <p>
-                  Also: 5× Salesforce certified, two first-place hackathon finishes, and four semesters teaching Operating Systems, so I can
-                  explain a race condition without a whiteboard (I&apos;d still like one).
-                </p>
-              </div>
+              <ScrollWords text={person.about} className="mt-5 text-2xl leading-snug font-medium tracking-tight sm:text-3xl" />
             </Reveal>
             <Proof />
+          </section>
+
+          <section id="approach" aria-label="How I build" className="mt-28 scroll-mt-16">
+            <SectionHeader eyebrow="How I build" title="Five opinions, each with receipts." />
+            <Principles items={principleViews} />
           </section>
 
           <section id="work" aria-label="Selected work" className="mt-28 scroll-mt-16">
             <SectionHeader
               eyebrow="Selected work"
               title="Things you can click."
-              intro="Most have a live demo. All of them have a repo, a test suite, or a trophy to explain why not."
+              intro="Live demos where possible. Tap a card for the build."
             />
             <Projects items={projectViews} />
           </section>
 
           <section id="experience" aria-label="Experience" className="mt-28 scroll-mt-16">
-            <SectionHeader eyebrow="Experience" title="Where the numbers came from." intro="Every metric on this page traces back to one of these roles. Click one to open it." />
+            <SectionHeader eyebrow="Experience" title="Where the numbers came from." intro="Every number on this page came from one of these." />
             <Experience roles={roleViews} />
             <Reveal className="mt-6">
               <a href={person.resume} download className="inline-flex items-center gap-2 text-sm font-medium underline-offset-4 hover:underline">
@@ -112,7 +119,7 @@ export default function Home() {
             <SectionHeader
               eyebrow="Skills, with receipts"
               title="Anyone can list Kafka."
-              intro="Pick a skill and see exactly which role, project, paper, or certification backs it. The bars show how many independent sources there are."
+              intro="Hover a skill. See the proof."
             />
             <Reveal>
               <SkillGraph skills={skillViews} />
@@ -120,12 +127,12 @@ export default function Home() {
           </section>
 
           <section id="research" aria-label="Research" className="mt-28 scroll-mt-16">
-            <SectionHeader eyebrow="Research" title="The part where I had to prove it." intro="A thesis with a number that matters, two peer-reviewed papers, and the paper trail around them." />
+            <SectionHeader eyebrow="Research" title="The part where I had to prove it." intro="One number that matters, and two papers." />
             <Research />
           </section>
 
           <section id="shipping" aria-label="Recently shipped" className="mt-28 scroll-mt-16">
-            <SectionHeader eyebrow="Shipping" title="Recently pushed." intro="Pulled live from GitHub every hour. No curation, apart from hiding forks." />
+            <SectionHeader eyebrow="Shipping" title="Recently pushed." intro="Live from GitHub, refreshed hourly." />
             <GitHubFeed profile={person.links.github} />
           </section>
 
@@ -134,11 +141,8 @@ export default function Home() {
               <div className="relative overflow-hidden rounded-3xl border border-line bg-surface p-7 sm:p-10">
                 <div className="pointer-events-none absolute -top-24 -right-24 size-72 rounded-full bg-[radial-gradient(closest-side,color-mix(in_oklab,var(--accent-2)_25%,transparent),transparent)]" />
                 <p className="font-mono text-xs uppercase tracking-[0.18em] text-accent">Contact</p>
-                <h2 className="mt-3 max-w-md text-3xl font-semibold tracking-tight text-balance sm:text-4xl">Hiring for backend, full-stack, or AI?</h2>
-                <p className="mt-3 max-w-md text-pretty text-muted">
-                  Email is the fastest way to reach me. If you&apos;d rather test me first, the AI will answer anything about my work, and it&apos;s been told not to
-                  exaggerate.
-                </p>
+                <SplitText text="Hiring for backend, full-stack, or AI?" className="mt-3 max-w-md text-3xl font-semibold tracking-tight text-balance sm:text-4xl" />
+                <p className="mt-3 max-w-md text-pretty text-muted">Email me, or grill the AI first. It&apos;s been told not to exaggerate.</p>
                 <div className="mt-7 flex flex-wrap gap-2">
                   <a
                     href={`mailto:${person.email}?subject=${encodeURIComponent("Opportunity for Sameer Nagar")}`}

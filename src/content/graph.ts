@@ -4,6 +4,7 @@
 import { awards, certifications, events } from "./achievements.ts";
 import { orgs } from "./orgs.ts";
 import { person, recruiter } from "./person.ts";
+import { principles } from "./principles.ts";
 import { projects } from "./projects.ts";
 import { education, publications, thesis } from "./research.ts";
 import { roles } from "./roles.ts";
@@ -58,6 +59,13 @@ export function validate(): void {
   need(projectById, thesis.project, "thesis");
   thesis.skills.forEach((s) => need(skillById, s, "thesis"));
   need(roleById, person.now, "person.now");
+  need(projectById, person.building, "person.building");
+  for (const p of principles) {
+    for (const proof of p.proof) {
+      if (proof.project) need(projectById, proof.project, `principle ${p.id}`);
+      if (proof.role) need(roleById, proof.role, `principle ${p.id}`);
+    }
+  }
 }
 
 validate();
@@ -118,6 +126,8 @@ export function graphAsContext(): string {
   lines.push(`LinkedIn: ${person.links.linkedin}`, `GitHub: ${person.links.github}`, `Resume: ${person.resume}`);
   lines.push("", "## For recruiters", `Target roles: ${recruiter.targetRoles.join("; ")}`, `Availability: ${recruiter.availability}`);
   lines.push(`Work authorization: ${recruiter.workAuth}`, `Location preference: ${recruiter.location}`);
+  lines.push("", "## How he builds (principles, each backed by work below)");
+  principles.forEach((p) => lines.push(`- ${p.title} ${p.line}`));
   lines.push("", "## Experience");
   for (const r of roles) {
     const org = orgById.get(r.org)!;
@@ -148,4 +158,4 @@ export function graphAsContext(): string {
   return lines.join("\n");
 }
 
-export { awards, certifications, education, events, orgs, person, projects, publications, recruiter, roles, skills, thesis };
+export { awards, certifications, education, events, orgs, person, principles, projects, publications, recruiter, roles, skills, thesis };

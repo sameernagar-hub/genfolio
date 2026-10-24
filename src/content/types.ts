@@ -17,7 +17,9 @@ export type Role = {
   start: string;
   end: string;
   current?: boolean;
+  timeline?: boolean; // false = shown as a credential, not in the experience list
   summary: string;
+  impact: string[]; // 2-3 short chips shown before the role is expanded
   highlights: { text: string; skills: string[] }[]; // skills -> Skill.id
   projects?: string[]; // -> Project.id
 };

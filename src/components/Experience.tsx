@@ -14,13 +14,14 @@ export type RoleView = {
   end: string;
   current?: boolean;
   summary: string;
+  impact: string[];
   highlights: string[];
   stack: string[];
   projects: { name: string; href?: string }[];
 };
 
 export function Experience({ roles }: { roles: RoleView[] }) {
-  const [open, setOpen] = useState<string | null>(roles[0]?.id ?? null);
+  const [open, setOpen] = useState<string | null>(null);
 
   return (
     <ol className="relative space-y-3 before:absolute before:top-3 before:bottom-3 before:left-[11px] before:w-px before:bg-line">
@@ -48,9 +49,28 @@ export function Experience({ roles }: { roles: RoleView[] }) {
                     <p className="mt-1 font-mono text-xs text-faint">
                       {r.start} – {r.end} · {r.location}
                     </p>
-                    <p className="mt-3 text-sm text-pretty text-muted">{r.summary}</p>
+                    <motion.ul
+                      className="mt-3 flex flex-wrap gap-1.5"
+                      initial="hidden"
+                      whileInView="show"
+                      viewport={{ once: true }}
+                      transition={{ staggerChildren: 0.08, delayChildren: 0.15 }}
+                    >
+                      {r.impact.map((chip) => (
+                        <motion.li
+                          key={chip}
+                          variants={{ hidden: { opacity: 0, y: 8, scale: 0.9 }, show: { opacity: 1, y: 0, scale: 1 } }}
+                          className="rounded-full border border-line bg-[color-mix(in_oklab,var(--accent)_10%,transparent)] px-2.5 py-1 font-mono text-[11px] text-fg"
+                        >
+                          {chip}
+                        </motion.li>
+                      ))}
+                    </motion.ul>
                   </div>
-                  <ChevronDown className={`mt-1 size-5 shrink-0 text-faint transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                  <span className="mt-0.5 flex shrink-0 items-center gap-1 text-xs text-faint">
+                    <span className="hidden sm:inline">{isOpen ? "less" : "details"}</span>
+                    <ChevronDown className={`size-4 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                  </span>
                 </button>
                 <AnimatePresence initial={false}>
                   {isOpen && (
@@ -62,12 +82,19 @@ export function Experience({ roles }: { roles: RoleView[] }) {
                       className="overflow-hidden"
                     >
                       <div className="border-t border-line px-5 pt-4 pb-6 sm:px-6">
+                        <p className="mb-3 text-sm text-pretty text-muted">{r.summary}</p>
                         <ul className="space-y-2.5 text-sm">
-                          {r.highlights.map((h) => (
-                            <li key={h} className="flex gap-2.5">
+                          {r.highlights.map((h, hi) => (
+                            <motion.li
+                              key={h}
+                              initial={{ opacity: 0, x: -8 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: 0.05 * hi }}
+                              className="flex gap-2.5"
+                            >
                               <span className="mt-2 size-1 shrink-0 rounded-full bg-accent" />
                               <span className="text-pretty">{h}</span>
-                            </li>
+                            </motion.li>
                           ))}
                         </ul>
                         <div className="mt-5 flex flex-wrap items-center gap-1.5">
