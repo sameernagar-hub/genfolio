@@ -2,109 +2,141 @@
 
 # Genfolio
 
-**An AI-native portfolio where every claim links to its evidence.**
+### A portfolio that can defend itself.
 
-Sameer Nagar's portfolio, built on a small content graph: roles, projects, skills, research, and awards point at each other by id,
-so the page can show *where* each skill was used, and the AI assistant answers only from that graph.
+Every claim links to its evidence. Every skill shows where it was used.<br/>
+And an AI you can interview, which only knows what's true.
 
-[Live site](https://genfolio.onrender.com) · [Resume](public/Sameer_Nagar_Resume.pdf) · [LinkedIn](https://www.linkedin.com/in/aavonsameer/) · [Email](mailto:nagarsam8989@gmail.com)
+[**Live site**](https://genfolio.onrender.com) · [Resume (PDF)](public/Sameer_Nagar_Resume.pdf) · [LinkedIn](https://www.linkedin.com/in/aavonsameer/) · [Email](mailto:nagarsam8989@gmail.com)
 
-![Next.js](https://img.shields.io/badge/Next.js-16-black) ![React](https://img.shields.io/badge/React-19-149eca) ![Tailwind](https://img.shields.io/badge/Tailwind-v4-38bdf8) ![Render](https://img.shields.io/badge/deploy-Render-46e3b7) ![License](https://img.shields.io/badge/license-MIT-blue)
+[![ci](https://github.com/sameernagar-hub/portfolio.ai/actions/workflows/ci.yml/badge.svg)](https://github.com/sameernagar-hub/portfolio.ai/actions/workflows/ci.yml)
+![Next.js 16](https://img.shields.io/badge/Next.js-16-black)
+![React 19](https://img.shields.io/badge/React-19-149eca)
+![Tailwind v4](https://img.shields.io/badge/Tailwind-v4-38bdf8)
+![Render](https://img.shields.io/badge/deploy-Render-46e3b7)
+![MIT](https://img.shields.io/badge/license-MIT-blue)
+
+<a href="https://genfolio.onrender.com"><img src="docs/preview.png" alt="Genfolio: Sameer Nagar, software engineer" width="760"/></a>
 
 </div>
 
-## For recruiters (30 seconds)
+---
+
+## Hiring? Start here.
+
+**Sameer Nagar**: software engineer who builds backend systems and AI products that hold up in production.
 
 | | |
 |---|---|
-| **Role** | Software Engineer: backend / full-stack, AI/LLM, Salesforce |
-| **Now** | GenAI Lead & Full Stack Engineer, Saayam For All (5 Spring Boot microservices on AWS EKS + Kafka; owns the GenAI Lambda services and their CI/CD) |
-| **Before** | Software Engineer, Unthinkable Solutions (15+ production REST APIs, 99.9% uptime under SLA for 50+ enterprise clients) |
-| **Education** | M.S. Computer Science, CSUF (GPA 3.70). Thesis cut false positives 0.886 → 0.023 |
-| **Proof** | 2× first-place hackathons, 5× Salesforce certified, 2 peer-reviewed papers |
-| **Location** | San Jose, CA, open to relocation and onsite work |
-| **Work authorization** | F-1 OPT (STEM extension eligible); will need sponsorship in the future |
+| 🟢 **Status** | Open to full-time roles · San Jose, CA · open to relocation and onsite |
+| 🛠 **Now** | GenAI Lead & Full Stack Engineer, **Saayam For All**: 5 Spring Boot 3 microservices on AWS EKS with Kafka; owns the GenAI Lambda services and their CI/CD |
+| 🏗 **Building in public** | [**REGEN**](https://github.com/sameernagar-hub/regen-engine): open-source job engine, v1.0.0, [live demo](https://regen-engine.onrender.com) |
+| 📈 **Before** | Software Engineer, **Unthinkable Solutions**: 15+ production REST APIs · 99.9% uptime under SLA for 50+ enterprise clients · −40% manual effort |
+| 🔬 **Research** | M.S. CS, CSUF (GPA 3.70). Thesis: **38× fewer false alarms** in anomaly detection (FPR 0.886 → 0.023) |
+| 🏆 **Proof** | 2× first-place hackathons · 5× Salesforce certified · 2 peer-reviewed papers |
+| 🪪 **Work authorization** | F-1 OPT (STEM extension eligible); will need sponsorship in the future |
 
-**Fastest path:** open the site → *Interview my AI* or *Match your JD* → email.
+**Three ways in:** [open the site](https://genfolio.onrender.com) → *Interview my AI* or *Match your JD* → [email](mailto:nagarsam8989@gmail.com).
+
+## How I build
+
+Five opinions, each backed by shipped work. The site renders them from [`src/content/principles.ts`](src/content/principles.ts), and the build fails if a proof link breaks.
+
+| | Principle | Receipt |
+|---|---|---|
+| 01 | **Receipts over vibes.** If a system makes a claim, it points at the evidence. | [CLARITY](https://github.com/sameernagar-hub/clarity): every score cites evidence · [REGEN](https://github.com/sameernagar-hub/regen-engine): resumes only claim what's proven |
+| 02 | **Evals before demos.** A demo shows it can work; an eval shows how often it doesn't. | [Anomaly Workbench](https://github.com/sameernagar-hub/anomaly-detection-workbench): FPR 0.886 → 0.023 · eval frameworks + guardrails at Saayam |
+| 03 | **Fail loud, never silent.** Contracts and named errors turn outages into one-line fixes. | Contract tests after a silent cross-team production failure at Saayam |
+| 04 | **Memory needs an undo button.** Agents ingest bad facts; provenance lets you revoke them. | [Immune](https://github.com/sameernagar-hub/immune): revocation cascade over agent memory |
+| 05 | **Ship under pressure.** Constraints make the product sharper. | 1st place, Agentic Dev Tools Hackathon · Immune built in one day |
+
+## Selected work
+
+| Project | What it is | Proof | Links |
+|---|---|---|---|
+| **REGEN** | Job engine that discovers roles at the source, writes truthful resumes from a Fact Bank, applies with receipts. MCP-driven, zero model spend. | v1.0.0 · MIT · CI | [repo](https://github.com/sameernagar-hub/regen-engine) · [live](https://regen-engine.onrender.com) |
+| **CLARITY** | FDA-style review room: retrieval → extraction → scoring, judgments only on cited evidence. | 53 tests | [repo](https://github.com/sameernagar-hub/clarity) · [live](https://fdaapproval-pzpr.onrender.com/?trial=NCT05951205) |
+| **Immune** | An immune system for agent memory: quarantine a poisoned fact, revoke everything built on it. | MongoDB .local Build Fest | [repo](https://github.com/sameernagar-hub/immune) · [live](https://immune-two.vercel.app) |
+| **AI Workflow Skill Builder** | Native macOS app that turns desktop activity into reusable automations. | 🏆 1st Place, Agentic Dev Tools | |
+| **Anomaly Detection Workbench** | Drift-robust, argument-aware log anomaly detection (M.S. thesis). | FPR 0.886 → 0.023 | [repo](https://github.com/sameernagar-hub/anomaly-detection-workbench) |
+| **PromptPilot** | Prompt intelligence from your real conversations. | v1 live | [repo](https://github.com/sameernagar-hub/promptPilot) · [live](https://promptpilot-web.vercel.app/) |
 
 ## What's on the site
 
-- **Sticky identity column** with availability, location, work authorization, resume, and a live section index.
-- **Interview my AI**: a streaming assistant grounded in the content graph (Gemini when a key is set, a deterministic offline answerer otherwise). Paste a job description and it lists matching skills with the role or project behind each one.
-- **Skills with receipts**: pick a skill and see the exact role, project, paper, or certification that proves it, ranked by how many independent sources back it.
-- **Selected work**: filterable project cards with the problem, what was built, the proof, and live/repo links.
-- **Research**: the M.S. thesis result drawn to scale, publications, education, awards.
-- **Shipping**: recent public GitHub pushes, refreshed hourly with ISR (no API call per visitor).
-- **⌘K command menu**, dark/light theme, reduced-motion support, OG image, JSON-LD, sitemap.
+- 🤖 **Interview my AI:** streaming assistant grounded in the content graph. Paste a job description and it lists matching skills with the role or project behind each. Gemini when a key is set, deterministic offline answers when not.
+- 🧾 **Skills with receipts:** hover a skill to see the exact role, project, paper, or certification that proves it, ranked by independent sources.
+- ✨ **Motion-first, minimal text:** a scroll-lit About line, counting stats, a rotating headline, staggered headings, cards that tilt, thesis bars that grow. All of it falls back to static text with `prefers-reduced-motion`.
+- 🧭 **Recruiter-first layout:** sticky identity column (status, location, work authorization, resume) and a live section index.
+- 🚢 **Shipping log:** latest public GitHub pushes, refreshed hourly (ISR, no API call per visitor).
+- ⌘ **Command menu**, dark/light theme, OG card, JSON-LD, sitemap, security headers.
 
 ## Architecture
 
+```mermaid
+flowchart LR
+  subgraph content["src/content · distributed graph"]
+    person & roles & projects & skills & principles & research & achievements & orgs
+  end
+  content --> graph["graph.ts<br/>validate ids · backlinks · AI context"]
+  graph --> page["page.tsx<br/>server component, ISR 1h"]
+  graph --> ai["lib/assistant.ts<br/>system prompt + offline answers + JD match"]
+  ai --> chat["/api/chat<br/>Gemini SSE → text stream<br/>rate limit · timeout"]
+  gh["GitHub API"] --> page
+  page --> ui["Sidebar · Principles · Projects · Experience<br/>SkillGraph · Research · Assistant · ⌘K"]
+```
+
+**Why it's built this way**
+
+- **One graph, many files.** Roles, projects, skills, principles, and research point at each other by `id`. A highlight tagged `kafka` automatically becomes Kafka evidence on the page *and* in the AI's context. Nothing is typed twice.
+- **The AI can't drift from the page.** Its system prompt is generated from the same graph the UI renders, with instructions to refuse anything not in it.
+- **Safe by default.** The API key stays server-side in a header, never in a URL. `/api/chat` is rate-limited per IP (8/min, 60/day), caps input, and times out at 20 s. No phone number on the page or in the AI's context.
+- **Cheap to run.** One Render web service, `output: "standalone"`, static page with hourly revalidation.
+
 ```
 src/
-├─ content/              distributed content graph (edit facts here)
-│  ├─ person.ts          identity, recruiter summary, headline stats
-│  ├─ roles.ts           roles -> org ids, highlight -> skill ids, project ids
-│  ├─ projects.ts        projects -> skill / role / award / event ids
-│  ├─ skills.ts          skill nodes + groups
-│  ├─ orgs.ts            companies and schools
-│  ├─ achievements.ts    awards, events, certifications
-│  ├─ research.ts        education, thesis, publications
-│  ├─ types.ts           node types
-│  └─ graph.ts           resolves edges, fails the build on a dangling id,
-│                        computes skill -> evidence backlinks, serializes
-│                        the graph as the AI's grounding context
-├─ lib/
-│  ├─ assistant.ts       system prompt + offline answerer + JD matcher
-│  ├─ rate-limit.ts      per-IP limits for /api/chat
-│  └─ github.ts          hourly-cached public repo feed
-├─ app/
-│  ├─ page.tsx           server component: joins graph views for the UI
-│  ├─ api/chat/route.ts  streams Gemini SSE as plain text; falls back offline
-│  ├─ api/health         Render health check
-│  └─ opengraph-image, sitemap, robots, icon
-└─ components/           Sidebar, Projects, Experience, SkillGraph,
-                         Research, GitHubFeed, Assistant, CommandPalette
+├─ content/      person · roles · projects · skills · principles · research · achievements · orgs · graph
+├─ lib/          assistant · rate-limit · github · site
+├─ app/          page · layout · api/chat · api/health · opengraph-image · sitemap · robots
+└─ components/   Sidebar · Principles · Projects · Experience · SkillGraph · Research
+                 GitHubFeed · Assistant · CommandPalette · motion (primitives) · ui
 ```
 
-**Design choices**
-
-- **Facts live in one graph, spread across files.** Nothing on the page or in the AI prompt is typed twice. A role highlight tagged `kafka` automatically shows up as Kafka evidence and in the assistant's context.
-- **The model can't drift from the page.** The system prompt is generated from the same graph the UI renders and tells the model to refuse anything not in it.
-- **The API key stays server-side** and is sent in a header, never in the URL. `/api/chat` is rate-limited per IP (8/min, 60/day), caps input size, and has a 20 s timeout.
-- **One Render web service.** `output: "standalone"` keeps the runtime small; the page is static with hourly revalidation.
-
-## Run locally
+## Run it
 
 ```bash
 npm install
 npm run dev          # http://localhost:3000
-npm test             # content-graph integrity, assistant routing, JD matching, rate limiter
+npm test             # graph integrity, assistant routing, JD matching, rate limiter
 npm run typecheck
 npm run build && npm start
 ```
 
-Copy `.env.example` to `.env.local`. Every variable is optional:
+Copy `.env.example` to `.env.local`. Every variable is optional.
 
 | Variable | Purpose |
 |---|---|
-| `GEMINI_API_KEY` | Enables live, streamed AI answers. Without it, the offline answerer is used. |
+| `GEMINI_API_KEY` | Live, streamed AI answers. Without it, the offline answerer is used. |
 | `GEMINI_MODEL` | Defaults to `gemini-2.5-flash`. |
-| `GITHUB_TOKEN` | Raises the GitHub API limit for the activity feed (read-only, public data). |
+| `GITHUB_TOKEN` | Higher GitHub API limit for the shipping log (read-only, public data). |
 | `NEXT_PUBLIC_SITE_URL` | Canonical URL for metadata and social cards. |
 
 ## Deploy on Render
 
-1. Render dashboard → **New → Blueprint** → select this repository. `render.yaml` defines the `genfolio` web service.
-2. Set `GEMINI_API_KEY` (optional) when Render asks for secret values.
-3. Every push to `main` redeploys. The health check is `/api/health`.
+1. Render dashboard → **New → Blueprint** → pick this repo. [`render.yaml`](render.yaml) defines the `genfolio` web service.
+2. Add `GEMINI_API_KEY` (optional) when Render asks for secrets.
+3. Every push to `main` redeploys; health check is `/api/health`.
 
-The free plan sleeps when idle, so the first visit after a while takes a few seconds; a paid instance avoids that.
+The free plan sleeps when idle, so the first visit after a quiet spell takes a few seconds.
 
-## Updating content
+## Make it yours
 
-Edit the files in `src/content/`. Reference other nodes by `id`; `npm test` and `npm run build` both fail if an id doesn't resolve.
-Keep claims provable: every number on the site comes from a role, project, or paper in the graph.
+Genfolio is MIT-licensed. Fork it, replace the files in `src/content/` with your own facts, and keep the rule that makes it work:
+**every claim must point at something real.** `npm test` and `npm run build` fail on a broken reference.
 
-## License
+---
 
-MIT © 2026 Sameer Nagar
+<div align="center">
+
+Designed and built by **Sameer Nagar** · MIT © 2026
+
+</div>
