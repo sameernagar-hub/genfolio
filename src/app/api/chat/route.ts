@@ -1,4 +1,4 @@
-import { BUSY_NOTE, leaks, localAnswer, REFUSE_INSTRUCTIONS, SYSTEM_INSTRUCTION, type ChatTurn } from "@/lib/assistant";
+import { BUSY_NOTE, leaks, localAnswer, REFUSE_INSTRUCTIONS, refusal, SYSTEM_INSTRUCTION, type ChatTurn } from "@/lib/assistant";
 import { answerCache } from "@/lib/cache";
 import { providers } from "@/lib/llm";
 import { checkRate, clientKey } from "@/lib/rate-limit";
@@ -34,6 +34,10 @@ export async function POST(req: Request) {
         .slice(-MAX_HISTORY)
         .map((t) => ({ role: t.role === "assistant" ? "assistant" : "user", content: t.content.slice(0, 1500) }))
     : [];
+
+  // Injection, off-topic, salary, comparison, and personal asks are refused before any model call.
+  const blocked = refusal(message);
+  if (blocked) return plain(blocked, "guard");
 
   // Fresh questions (no history) are cached: the starter prompts repeat a lot and model quota is small.
   const cacheable = history.length === 0;

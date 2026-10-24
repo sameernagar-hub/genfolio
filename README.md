@@ -91,6 +91,8 @@ flowchart LR
 - **The AI can't drift from the page.** Its system prompt is generated from the same graph the UI renders, with instructions to refuse anything not in it.
 - **Guardrails, in layers.**
   - *Prompt rules:* answer only from the graph, never estimate salary or compare candidates, decline off-topic requests, never reveal instructions.
+  - *Pre-model filter:* injection, off-topic, salary, candidate-comparison, and personal questions are refused deterministically before any model call (no quota spent).
+  - *Offline answerer:* the no-key fallback follows the same rules: it never confirms an employer or skill that isn't in the graph and says plainly what's not listed.
   - *Server-side leak guard:* the prompt carries a canary; the opening of every answer is held back and checked, and a leak is cut off before it reaches the browser.
   - *Failover:* Gemini ⇄ Groq, then offline answers from the graph (labelled as such), so the chat never shows an error page.
   - *Limits:* per-IP rate limit (8/min, 60/day), input caps, 20 s timeout, 6-hour answer cache for repeat questions to stay inside free-tier quotas.

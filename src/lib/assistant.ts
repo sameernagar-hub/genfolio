@@ -4,7 +4,7 @@
 import {
   awards, certifications, evidenceBySkill, graphAsContext, person, projects, rankedSkills, recruiter, roles, skills,
 } from "../content/graph.ts";
-import { eventOf, orgOf } from "../content/graph.ts";
+import { eventOf, orgOf, orgs, projectsForRole } from "../content/graph.ts";
 
 export type ChatTurn = { role: "user" | "assistant"; content: string };
 
@@ -63,6 +63,85 @@ export function matchJobDescription(jd: string) {
   return matched.map((s) => ({ skill: s, evidence: evidenceBySkill.get(s.id)! }));
 }
 
+const OFF_TOPIC = "I only answer questions about Sameer's work, skills, projects, and how to reach him. Try “Why should we hire Sameer?” or paste a job description.";
+const NOT_LISTED = (what: string) => `The portfolio doesn't list ${what}. ${contact}`;
+
+const roleLine = (r: (typeof roles)[number]) =>
+  `**${r.title}, ${orgOf(r).name}** (${r.start} – ${r.end})\n\n${bullets(r.highlights.slice(0, 4).map((h) => h.text))}`;
+
+const projectLine = (p: (typeof projects)[number]) =>
+  `**${p.name}**: ${p.tagline} (${p.year})\n\n${bullets([...p.built, `Proof: ${p.proof}`])}${p.live ? `\n\nLive: ${p.live}` : ""}${p.repo ? `\n\nCode: ${p.repo}` : ""}`;
+
+/**
+ * Deterministic guardrails. `refusal` also runs before any model call (blocking injection,
+ * off-topic, salary, comparison, and personal asks at zero cost); the rest of
+ * `guardrailAnswer` serves the offline answerer, mirroring the model's rules:
+ * refuse injection and off-topic asks, never guess salary or personal details, never
+ * confirm an employer or skill that isn't in the graph.
+ */
+export function refusal(m: string): string | undefined {
+  const t = m.toLowerCase();
+
+  if (/system prompt|your (instructions|rules|prompt)|ignore (all |any |the )?(previous|prior|above)|you are now|pretend|role-?play|jailbreak|developer mode|act as/.test(t)) {
+    return REFUSE_INSTRUCTIONS;
+  }
+  if (/\b(poem|poetry|song|lyrics|joke|story|weather|recipe|translate|horoscope)\b|\bwrite (me )?(a |an |some )?(code|function|script|program|essay)|\bfunction to\b/.test(t)) {
+    return OFF_TOPIC;
+  }
+  if (/\b(salary|compensation|pay|paid|hourly rate|pay rate|ctc|wage|expected comp)\b/.test(t)) {
+    return NOT_LISTED("salary expectations; that's best discussed with Sameer directly");
+  }
+  if (/\b(better|worse|rank|ranking)\b.*\b(than|candidates?|others?)\b|\bcompare(d)? (him )?(to|with|against)\b/.test(t)) {
+    return "I can't compare Sameer with other candidates. I can show the evidence behind his skills for your role: paste the job description and I'll match it.";
+  }
+  if (/\b(phone|cell|mobile|address|age|how old|married|wife|husband|kids|children|religion|nationality|gender|health|birthday|date of birth)\b/.test(t)) {
+    return `The portfolio doesn't share personal details. The best way to reach Sameer is email: ${person.email}. Resume: ${person.resume}`;
+  }
+  return undefined;
+}
+
+function guardrailAnswer(m: string): string | undefined {
+  const blocked = refusal(m);
+  if (blocked) return blocked;
+  const t = m.toLowerCase();
+
+  // "Did he work at X?" — confirm only employers in the graph.
+  const employer = t.match(/\b(?:work(?:ed|s)?|employed|intern(?:ed)?|job)\s+(?:at|for)\s+([a-z0-9 .&'-]{2,40})/);
+  if (employer && !/\b(authoriz|visa|sponsor)/.test(t)) {
+    const asked = employer[1].replace(/\b(just|say|yes|no|please|before|currently|now|right)\b.*$/, "").replace(/[?.!,].*$/, "").trim();
+    const hit = roles.find((r) => {
+      const name = orgOf(r).name.toLowerCase();
+      return name.includes(asked) || asked.includes(name.split(/[ ,]/)[0]);
+    });
+    if (hit) return roleLine(hit);
+    return NOT_LISTED(`${asked.replace(/\b\w/g, (c) => c.toUpperCase())} as an employer. His roles: ${roles.map((r) => `${r.title}, ${orgOf(r).name}`).join("; ")}.`);
+  }
+
+  // A project or organization named directly.
+  const project = projects.find((p) => t.includes(p.name.toLowerCase()) || t.includes(p.id.replace(/-/g, " ")));
+  if (project) return projectLine(project);
+  const org = orgs.find((o) => t.includes(o.name.toLowerCase().split(/[ ,]/)[0]) && o.name.split(" ")[0].length > 3);
+  const orgRole = org && roles.find((r) => r.org === org.id && r.timeline !== false);
+  if (orgRole) {
+    const built = projectsForRole(orgRole.id).map((p) => p.name);
+    return roleLine(orgRole) + (built.length ? `\n\nRelated work: ${built.join(", ")}.` : "");
+  }
+
+  // "Does he know X?" — report evidence per skill, and say plainly what isn't listed.
+  const skillAsk = t.match(/\b(?:know|knows|use[sd]?|experience (?:with|in)|familiar with|worked with|skilled in|proficient in)\s+(.+)/);
+  if (skillAsk) {
+    const terms = skillAsk[1].replace(/[?.!]/g, "").split(/\s*(?:,|\band\b|\bor\b|\/)\s*/).map((s) => s.replace(/\b(development|dev|programming|framework|language)\b/g, "").trim()).filter(Boolean);
+    const lines = terms.map((term) => {
+      const hits = matchJobDescription(` ${term} `);
+      if (!hits.length) return `**${term}**: not listed in the portfolio.`;
+      const { skill, evidence } = hits[0];
+      return `**${skill.label}**: ${evidence.slice(0, 2).map((e) => e.label).join("; ")}`;
+    });
+    return `${bullets(lines)}\n\n${contact}`;
+  }
+  return undefined;
+}
+
 export function localAnswer(message: string): string {
   const m = message.trim();
 
@@ -77,6 +156,9 @@ export function localAnswer(message: string): string {
       .map(({ skill, evidence }) => `**${skill.label}**: ${evidence.slice(0, 2).map((e) => e.label).join("; ")}`);
     return `**Job match: ${hits.length} required skills found in Sameer's evidence.**\n\n${bullets(top)}\n\nThis is a keyword match against the portfolio, not a judgment of seniority. ${contact}`;
   }
+
+  const guarded = guardrailAnswer(m);
+  if (guarded) return guarded;
 
   if (has(m, ["hire", "hiring", "pitch", "summary", "summarize", "overview", "intro", "introduce"])) {
     return `**Why Sameer:**\n\n${bullets([
